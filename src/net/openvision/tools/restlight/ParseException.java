@@ -11,6 +11,7 @@ public class ParseException extends Exception {
 
 	public ParseException(String message, int line) {
 		super(message);
+		this.line = line;
 	}
 
 	public int getLine() {
