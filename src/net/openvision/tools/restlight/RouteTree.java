@@ -38,7 +38,13 @@ public class RouteTree {
 
 	private void print(StringBuilder output, int indent, RouteNode node) {
 		output.append(spaces, 0, indent);
-		output.append(node.toString()).append('\n');
+		String nodeStr = node.toString();
+		output.append(nodeStr);
+		if (node.getControllerClassName() != null) {
+			output.append(spaces, 0, 60 - indent - nodeStr.length());
+			output.append(node.getControllerClassName());
+		}
+		output.append('\n');
 		for (RouteNode c : node.getChildren()) {
 			print(output, indent + 2, c);
 		}

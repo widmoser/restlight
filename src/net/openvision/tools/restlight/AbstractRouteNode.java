@@ -5,6 +5,7 @@ import java.util.List;
 
 public abstract class AbstractRouteNode implements RouteNode {
 
+	protected String controllerClassName;
 	protected List<RouteNode> children;
 
 	public AbstractRouteNode() {
@@ -34,6 +35,16 @@ public abstract class AbstractRouteNode implements RouteNode {
 	@Override
 	public void addAllChildren(List<RouteNode> children) {
 		this.children.addAll(children);
+	}
+
+	@Override
+	public void setControllerClassName(String clazz) {
+		controllerClassName = clazz;
+	}
+
+	@Override
+	public String getControllerClassName() {
+		return controllerClassName;
 	}
 
 }

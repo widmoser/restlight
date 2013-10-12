@@ -18,4 +18,8 @@ public interface RouteNode {
 
 	public boolean matches(PushbackReader reader) throws IOException, MatchException;
 
+	public void setControllerClassName(String clazz);
+
+	public String getControllerClassName();
+
 }

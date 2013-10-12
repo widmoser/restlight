@@ -30,16 +30,16 @@ public class Parser {
 		PushbackReader reader = new PushbackReader(input, 256);
 		RouteTree tree = new RouteTree();
 		int line = 0;
-		while (parsePath(tree, reader, line++)) {
+		while (parseRoute(tree, reader, line++)) {
 		}
 		return tree;
 	}
 
-	public boolean parsePath(RouteTree tree, PushbackReader reader, int line) throws IOException, ParseException {
+	private RouteNode parsePath(RouteTree tree, PushbackReader reader, int line) throws IOException, ParseException {
 		int c = reader.read();
 		RouteNode node = tree.getRoot();
 		// TODO: check also if character is a valid path character
-		while (!Character.isWhitespace(c) && c >= 0) {
+		while (!Character.isWhitespace(c) && c != '\n' && c >= 0) {
 
 			if (c != PATH_SEPARATOR) {
 				throw new ParseException("Expected path separator character: " + PATH_SEPARATOR, line);
@@ -86,7 +86,56 @@ public class Parser {
 
 		}
 
-		return c >= 0;
+		if (c < 0 || c == '\n') {
+			throw new ParseException("Missing controller statement", line);
+		}
+
+		return node;
 	}
 
+	private void skipWhitespaces(PushbackReader reader) throws IOException {
+		int c = reader.read();
+		while (Character.isWhitespace(c))
+			c = reader.read();
+		reader.unread(c);
+	}
+
+	private int parseJavaIdentifier(StringBuilder output, PushbackReader reader, int line) throws IOException,
+			ParseException {
+		int c = reader.read();
+		if (!Character.isJavaIdentifierStart(c)) {
+			throw new ParseException("Invalid controller class name", line);
+		} else {
+			output.append((char) c);
+		}
+
+		c = reader.read();
+		while (Character.isJavaIdentifierPart(c)) {
+			output.append((char) c);
+			c = reader.read();
+		}
+
+		if (c == '.') {
+			return c; // expect more
+		} else if (c == '\n' || c == -1) {
+			return c; // line finished
+		} else {
+			throw new ParseException("Invalid controller class name", line);
+		}
+	}
+
+	private int parseController(RouteNode node, PushbackReader reader, int line) throws IOException, ParseException {
+		StringBuilder s = new StringBuilder();
+		int c = parseJavaIdentifier(s, reader, line);
+		while (c == '.')
+			parseJavaIdentifier(s, reader, line);
+		node.setControllerClassName(s.toString());
+		return c;
+	}
+
+	public boolean parseRoute(RouteTree tree, PushbackReader reader, int line) throws IOException, ParseException {
+		RouteNode node = parsePath(tree, reader, line);
+		skipWhitespaces(reader);
+		return parseController(node, reader, line) >= 0;
+	}
 }
