@@ -23,7 +23,7 @@ public interface RouteNode {
 	public void setControllerClassName(String clazz);
 
 	public String getControllerClassName();
-	
+
 	public Controller getController();
 
 	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
@@ -31,4 +31,9 @@ public interface RouteNode {
 
 	RouteNode findNode(PushbackReader reader) throws MatchException;
 
+	RouteNode findNode(String path) throws MatchException;
+	
+	public boolean isPathEnd();
+	
+	public String getPathRepresentation();
 }

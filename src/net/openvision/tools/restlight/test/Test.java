@@ -16,6 +16,10 @@ public class Test {
 			Parser parser = new Parser();
 			RouteTree tree = parser.parse(new FileReader(filename));
 			System.out.println(tree.toString());
+
+			for (String a : tree.getActions()) {
+				System.out.println(a);
+			}
 		} catch (ParseException e) {
 			System.err.println(filename + ":" + e.getLine() + " - " + e.getLocalizedMessage());
 		}

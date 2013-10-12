@@ -121,6 +121,7 @@ public class Parser {
 		}
 
 		if (c == '.') {
+			output.append((char) c);
 			return c; // expect more
 		} else if (c == '\n' || c == -1) {
 			return c; // line finished
@@ -133,7 +134,7 @@ public class Parser {
 		StringBuilder s = new StringBuilder();
 		int c = parseJavaIdentifier(s, reader, line);
 		while (c == '.')
-			parseJavaIdentifier(s, reader, line);
+			c = parseJavaIdentifier(s, reader, line);
 		node.setControllerClassName(s.toString());
 		return c;
 	}

@@ -3,14 +3,22 @@ package net.openvision.tools.restlight;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PushbackReader;
-import java.io.StringReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.Version;
 
 public class RestServlet extends HttpServlet {
 
@@ -21,8 +29,43 @@ public class RestServlet extends HttpServlet {
 
 	private RouteTree tree;
 
+	private Configuration cfg;
+
+	private void initTemplateEngine(ServletConfig config) throws ServletException {
+
+		cfg = new Configuration();
+
+		// Specify the data source where the template files come from. Here I
+		// set a
+		// plain directory for it, but non-file-system are possible too:
+		cfg.setServletContextForTemplateLoading(config.getServletContext(), "/");
+
+		// Specify how templates will see the data-model. This is an advanced
+		// topic...
+		// for now just use this:
+		cfg.setObjectWrapper(new DefaultObjectWrapper());
+
+		// Set your preferred charset template files are stored in. UTF-8 is
+		// a good choice in most applications:
+		cfg.setDefaultEncoding("UTF-8");
+
+		// Sets how errors will appear. Here we assume we are developing HTML
+		// pages.
+		// For production systems TemplateExceptionHandler.RETHROW_HANDLER is
+		// better.
+		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+
+		// At least in new projects, specify that you want the fixes that aren't
+		// 100% backward compatible too (these are very low-risk changes as far
+		// as the
+		// 1st and 2nd version number remains):
+		cfg.setIncompatibleImprovements(new Version(2, 3, 20)); // FreeMarker
+																// 2.3.20
+	}
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
+		initTemplateEngine(config);
 		String filename = config.getInitParameter("routes");
 		try {
 			Parser parser = new Parser();
@@ -51,12 +94,20 @@ public class RestServlet extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
 		} else {
 			try {
-				root.findNode(new PushbackReader(new StringReader(request.getServletPath()))).getController()
-						.action(request, response);
+				String uri = request.getRequestURI();
+				root.findNode(uri).getController().action(request, response);
 			} catch (MatchException e) {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().println(e.getLocalizedMessage());
-				e.printStackTrace(response.getWriter());
+				try {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+					Template template = new Template("ActionNotFound", new InputStreamReader(getClass()
+							.getResourceAsStream("actionNotFound.ftl")), cfg);
+					Map<String, Object> data = new HashMap<String, Object>();
+					data.put("actions", tree.getActions());
+					template.process(data, response.getWriter());
+				} catch (TemplateException e1) {
+					e1.printStackTrace(response.getWriter());
+				}
 			}
 		}
 	}

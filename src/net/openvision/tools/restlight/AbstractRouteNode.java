@@ -2,6 +2,7 @@ package net.openvision.tools.restlight;
 
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,14 +79,28 @@ public abstract class AbstractRouteNode implements RouteNode {
 			} else {
 				for (RouteNode n : children) {
 					if (n.matches(reader)) {
+						if (n.isPathEnd() && reader.read() >= 0) {
+							throw new MatchException();
+						}
 						return n.findNode(reader);
 					}
 				}
-				throw new MatchException("Action not found.");
+				throw new MatchException();
 			}
 		} catch (IOException e) {
 			throw new MatchException("Unexpected error: " + e.getLocalizedMessage());
 		}
 	}
 
+	public RouteNode findNode(String path) throws MatchException {
+		try {
+			PushbackReader reader = new PushbackReader(new StringReader(path), 256);
+			if (reader.read() != '/') {
+				throw new MatchException();
+			}
+			return findNode(reader);
+		} catch (IOException e) {
+			throw new MatchException("Unexpected error: " + e.getLocalizedMessage());
+		}
+	}
 }

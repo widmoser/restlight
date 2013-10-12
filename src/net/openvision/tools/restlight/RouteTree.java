@@ -2,7 +2,9 @@ package net.openvision.tools.restlight;
 
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -31,6 +33,16 @@ public class RouteTree {
 		@Override
 		public String toString() {
 			return method + ":";
+		}
+
+		@Override
+		public boolean isPathEnd() {
+			return false;
+		}
+
+		@Override
+		public String getPathRepresentation() {
+			return method + " /";
 		}
 
 	}
@@ -78,5 +90,24 @@ public class RouteTree {
 		for (RouteNode method : methods.values()) {
 			method.initControllers();
 		}
+	}
+
+	private void appendActions(String path, RouteNode node, List<String> actions) {
+		path = path + node.getPathRepresentation();
+		if (node.getControllerClassName() != null) {
+			actions.add(path);
+		} else {
+			for (RouteNode n : node.getChildren()) {
+				appendActions(path, n, actions);
+			}
+		}
+	}
+
+	public List<String> getActions() {
+		List<String> result = new ArrayList<String>();
+		for (RouteNode method : methods.values()) {
+			appendActions("", method, result);
+		}
+		return result;
 	}
 }

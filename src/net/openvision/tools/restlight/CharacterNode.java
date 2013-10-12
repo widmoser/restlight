@@ -67,8 +67,9 @@ public class CharacterNode extends AbstractRouteNode {
 				}
 			}
 			c = reader.read();
-			if (!isPathEnd || (Character.isWhitespace(c) || c == '/')) {
-				reader.unread(c);
+			if (!isPathEnd || (Character.isWhitespace(c) || c == '/' || c < 0)) {
+				if (c >= 0)
+					reader.unread(c);
 				return true;
 			} else {
 				reader.unread(c);
@@ -85,5 +86,15 @@ public class CharacterNode extends AbstractRouteNode {
 	@Override
 	public String toString() {
 		return "{" + character + "}" + (remaining != null ? remaining : "") + (isPathEnd ? "/" : "");
+	}
+
+	@Override
+	public boolean isPathEnd() {
+		return isPathEnd;
+	}
+
+	@Override
+	public String getPathRepresentation() {
+		return String.valueOf(character) + (remaining != null ? remaining : "");
 	}
 }

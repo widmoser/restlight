@@ -16,4 +16,14 @@ public class EmptyNode extends AbstractRouteNode {
 		return "{}";
 	}
 
+	@Override
+	public boolean isPathEnd() {
+		return true;
+	}
+
+	@Override
+	public String getPathRepresentation() {
+		return "/";
+	}
+
 }

@@ -9,7 +9,12 @@ public class MatchException extends Exception {
 	private CharSequence match;
 
 	public MatchException(CharSequence match) {
+		super("Action not found");
 		this.match = match;
+	}
+
+	public MatchException() {
+		this("");
 	}
 
 	public CharSequence getMatch() {
