@@ -5,19 +5,19 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import net.openvision.tools.restlight.ParseException;
-import net.openvision.tools.restlight.Parser;
-import net.openvision.tools.restlight.RouteTree;
+import net.openvision.tools.restlight.RouteTreeParser;
+import net.openvision.tools.restlight.Routes;
 
 public class Test {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		String filename = "routes";
 		try {
-			Parser parser = new Parser();
-			RouteTree tree = parser.parse(new FileReader(filename));
-			System.out.println(tree.toString());
+			RouteTreeParser parser = new RouteTreeParser();
+			Routes routes = parser.parse(new FileReader(filename));
+			System.out.println(routes.toString());
 
-			for (String a : tree.getActions()) {
+			for (String a : routes.getActions()) {
 				System.out.println(a);
 			}
 		} catch (ParseException e) {
