@@ -35,9 +35,14 @@ public class Parser {
 		return tree;
 	}
 
-	private RouteNode parsePath(RouteTree tree, PushbackReader reader, int line) throws IOException, ParseException {
+	private RouteNode parsePath(RouteTree tree, String method, PushbackReader reader, int line) throws IOException,
+			ParseException {
 		int c = reader.read();
-		RouteNode node = tree.getRoot();
+		RouteNode node = tree.getRoot(method);
+		if (node == null) {
+			throw new ParseException("Unsupported HTTP method: " + method, line);
+		}
+
 		// TODO: check also if character is a valid path character
 		while (!Character.isWhitespace(c) && c != '\n' && c >= 0) {
 
@@ -133,8 +138,20 @@ public class Parser {
 		return c;
 	}
 
+	private String parseMethod(PushbackReader reader, int line) throws IOException, ParseException {
+		StringBuilder s = new StringBuilder();
+		int c = reader.read();
+		while (!Character.isWhitespace(c)) {
+			s.append((char) c);
+			c = reader.read();
+		}
+		return s.toString();
+	}
+
 	public boolean parseRoute(RouteTree tree, PushbackReader reader, int line) throws IOException, ParseException {
-		RouteNode node = parsePath(tree, reader, line);
+		String method = parseMethod(reader, line);
+		skipWhitespaces(reader);
+		RouteNode node = parsePath(tree, method, reader, line);
 		skipWhitespaces(reader);
 		return parseController(node, reader, line) >= 0;
 	}

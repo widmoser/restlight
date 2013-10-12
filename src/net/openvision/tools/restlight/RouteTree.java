@@ -2,6 +2,8 @@ package net.openvision.tools.restlight;
 
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A tree that allows to decide who should handle the request.
@@ -11,7 +13,13 @@ import java.io.PushbackReader;
  */
 public class RouteTree {
 
-	private class RootNodeType extends AbstractRouteNode {
+	private class MethodNode extends AbstractRouteNode {
+
+		private String method;
+
+		public MethodNode(String method) {
+			this.method = method;
+		}
 
 		@Override
 		public boolean matches(PushbackReader reader) throws IOException, MatchException {
@@ -20,18 +28,22 @@ public class RouteTree {
 
 		@Override
 		public String toString() {
-			return "RouteTree:";
+			return method + ":";
 		}
 
 	}
 
-	private RouteNode root = new RootNodeType();
+	private Map<String, RouteNode> methods = new HashMap<String, RouteNode>();
 
 	public RouteTree() {
+		methods.put("POST", new MethodNode("POST"));
+		methods.put("PATCH", new MethodNode("PATCH"));
+		methods.put("GET", new MethodNode("GET"));
+		methods.put("DELETE", new MethodNode("DELETE"));
 	}
 
-	public RouteNode getRoot() {
-		return root;
+	public RouteNode getRoot(String method) {
+		return methods.get(method);
 	}
 
 	private static CharSequence spaces = "                                                              ";
@@ -53,8 +65,9 @@ public class RouteTree {
 	@Override
 	public String toString() {
 		StringBuilder output = new StringBuilder();
-		print(output, 0, root);
+		for (RouteNode method : methods.values()) {
+			print(output, 0, method);
+		}
 		return output.toString();
 	}
-
 }
