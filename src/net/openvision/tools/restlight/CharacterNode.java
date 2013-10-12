@@ -5,23 +5,17 @@ import java.io.PushbackReader;
 
 public class CharacterNode extends AbstractRouteNode {
 
-	private char character;
-	private CharSequence remaining;
+	private CharSequence label;
 	private boolean isPathEnd;
 
-	public CharacterNode(CharSequence seq) {
-		this.character = seq.charAt(0);
-		this.remaining = seq.subSequence(1, seq.length());
-		this.buffer = new char[remaining.length()];
+	public CharacterNode(CharSequence label) {
+		this.label = label;
+		this.buffer = new char[label.length()];
 		this.isPathEnd = true;
 	}
 
-	public char getCharacter() {
-		return character;
-	}
-
 	void delegateToChild(CharSequence match) {
-		CharSequence delegateRemaining = remaining.subSequence(match.length(), remaining.length());
+		CharSequence delegateRemaining = label.subSequence(match.length(), label.length());
 		RouteNode delegateNode;
 		if (delegateRemaining.length() > 0)
 			delegateNode = new CharacterNode(delegateRemaining);
@@ -29,24 +23,19 @@ public class CharacterNode extends AbstractRouteNode {
 			delegateNode = new EmptyNode();
 		delegateNode.addAllChildren(getChildren());
 		removeAllChildren();
-		remaining = remaining.subSequence(0, match.length());
+		label = label.subSequence(0, match.length());
 		isPathEnd = false;
-		if (remaining.length() == 0) {
-			remaining = null;
+		if (label.length() == 0) {
+			label = null;
 			buffer = null;
 		} else {
-			this.buffer = new char[remaining.length()];
+			this.buffer = new char[label.length()];
 		}
 		addChild(delegateNode);
 	}
 
-	public CharSequence getRemaining() {
-		return remaining;
-	}
-
-	void clearRemaining() {
-		remaining = null;
-		buffer = null;
+	public CharSequence getLabel() {
+		return label;
 	}
 
 	private char[] buffer;
@@ -54,38 +43,30 @@ public class CharacterNode extends AbstractRouteNode {
 	@Override
 	public boolean matches(PushbackReader reader) throws IOException, MatchException {
 		int c = reader.read();
-		if (character == c) {
-			if (remaining != null) {
-				for (int i = 0; i < remaining.length(); ++i) {
-					c = reader.read();
-					buffer[i] = (char) c;
-					if (c != remaining.charAt(i)) {
-						reader.unread(buffer, 0, i + 1);
-						reader.unread(character);
-						throw new MatchException(remaining.subSequence(0, i));
-					}
+		if (label != null) {
+			for (int i = 0; i < label.length(); ++i) {
+				buffer[i] = (char) c;
+				if (c != label.charAt(i)) {
+					reader.unread(buffer, 0, i + 1);
+					throw new MatchException(label.subSequence(0, i));
 				}
+				c = reader.read();
 			}
-			c = reader.read();
-			if (!isPathEnd || (Character.isWhitespace(c) || c == '/' || c < 0)) {
-				if (c >= 0)
-					reader.unread(c);
-				return true;
-			} else {
+		}
+		if (!isPathEnd || (Character.isWhitespace(c) || c == '/' || c < 0)) {
+			if (c >= 0)
 				reader.unread(c);
-				reader.unread(buffer, 0, buffer.length);
-				reader.unread(character);
-				throw new MatchException(remaining);
-			}
+			return true;
 		} else {
 			reader.unread(c);
-			return false;
+			reader.unread(buffer, 0, buffer.length);
+			throw new MatchException(label);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "{" + character + "}" + (remaining != null ? remaining : "") + (isPathEnd ? "/" : "");
+		return (label != null ? label : "") + (isPathEnd ? "/" : "");
 	}
 
 	@Override
@@ -95,6 +76,6 @@ public class CharacterNode extends AbstractRouteNode {
 
 	@Override
 	public String getPathRepresentation() {
-		return String.valueOf(character) + (remaining != null ? remaining : "");
+		return (label != null ? label : "").toString();
 	}
 }
