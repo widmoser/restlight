@@ -1,0 +1,19 @@
+<project name="restlight" default="build" basedir=".">
+	<description>
+		Build script for restlight
+	</description>
+	<!-- TODO: let this point to your project -->
+	<property name="app" location="../../holybook/webapp" />
+	<property name="src" location="src" />
+	<property name="build" location="bin" />
+	<property name="dist" location="." />
+
+	<target name="build">
+		<jar destfile="${dist}/restlight.jar" basedir="${build}" />
+		<antcall target="copy" />
+	</target>
+
+	<target name="copy">
+		<copy file="${dist}/restlight.jar" todir="${app}/war/WEB-INF/lib" />
+	</target>
+</project>

@@ -7,5 +7,6 @@
 			<attribute name="javadoc_location" value="file:/Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.8.3/appengine-java-sdk-1.8.3/docs/javadoc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/freemarker-gae-2.3.20.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
