@@ -15,7 +15,7 @@ import javax.servlet.ServletException;
  * @author Hannes Widmoser
  * 
  */
-public class RouteTree {
+public class RouteTree implements Routes {
 
 	private class MethodNode extends AbstractRouteNode {
 
@@ -49,11 +49,12 @@ public class RouteTree {
 
 	private Map<String, RouteNode> methods = new HashMap<String, RouteNode>();
 
+	private static String[] supportedMethods = { "POST", "PUT", "PATCH", "GET", "DELETE", "OPTIONS", "TRACE" };
+
 	public RouteTree() {
-		methods.put("POST", new MethodNode("POST"));
-		methods.put("PATCH", new MethodNode("PATCH"));
-		methods.put("GET", new MethodNode("GET"));
-		methods.put("DELETE", new MethodNode("DELETE"));
+		for (String method : supportedMethods) {
+			methods.put(method, new MethodNode(method));
+		}
 	}
 
 	public RouteNode getRoot(String method) {
@@ -85,6 +86,7 @@ public class RouteTree {
 		return output.toString();
 	}
 
+	@Override
 	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			ServletException {
 		for (RouteNode method : methods.values()) {
@@ -103,11 +105,17 @@ public class RouteTree {
 		}
 	}
 
+	@Override
 	public List<String> getActions() {
 		List<String> result = new ArrayList<String>();
 		for (RouteNode method : methods.values()) {
 			appendActions("", method, result);
 		}
 		return result;
+	}
+
+	@Override
+	public Controller getController(String method, String uri) throws UnsupportedMethodException, MatchException {
+		return getRoot(method).findNode(uri).getController();
 	}
 }

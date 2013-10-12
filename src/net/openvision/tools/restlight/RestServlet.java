@@ -27,7 +27,7 @@ public class RestServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -3619582143214803843L;
 
-	private RouteTree tree;
+	private Routes routes;
 
 	private Configuration cfg;
 
@@ -68,9 +68,9 @@ public class RestServlet extends HttpServlet {
 		initTemplateEngine(config);
 		String filename = config.getInitParameter("routes");
 		try {
-			Parser parser = new Parser();
-			tree = parser.parse(new FileReader(filename));
-			tree.initControllers();
+			RouteTreeParser parser = new RouteTreeParser();
+			routes = parser.parse(new FileReader(filename));
+			routes.initControllers();
 		} catch (ParseException e) {
 			throw new ServletException(filename + ":" + e.getLine() + " - " + e.getLocalizedMessage(), e);
 		} catch (FileNotFoundException e) {
@@ -89,27 +89,24 @@ public class RestServlet extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
 			IOException {
-		RouteNode root = tree.getRoot(request.getMethod());
-		if (root == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-		} else {
+		try {
+			routes.getController(request.getMethod(), request.getRequestURI()).action(request, response);
+		} catch (MatchException e) {
 			try {
-				String uri = request.getRequestURI();
-				root.findNode(uri).getController().action(request, response);
-			} catch (MatchException e) {
-				try {
-					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-					Template template = new Template("ActionNotFound", new InputStreamReader(getClass()
-							.getResourceAsStream("actionNotFound.ftl")), cfg);
-					Map<String, Object> data = new HashMap<String, Object>();
-					data.put("actions", tree.getActions());
-					template.process(data, response.getWriter());
-				} catch (TemplateException e1) {
-					e1.printStackTrace(response.getWriter());
-				}
+				Template template = new Template("ActionNotFound", new InputStreamReader(getClass()
+						.getResourceAsStream("actionNotFound.ftl")), cfg);
+				Map<String, Object> data = new HashMap<String, Object>();
+				data.put("actions", routes.getActions());
+				template.process(data, response.getWriter());
+			} catch (TemplateException e1) {
+				e1.printStackTrace(response.getWriter());
 			}
+		} catch (UnsupportedMethodException e) {
+			response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
 		}
+
 	}
 
 }
