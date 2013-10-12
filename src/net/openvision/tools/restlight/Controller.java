@@ -10,6 +10,6 @@ public interface Controller {
 
 	public void init() throws ServletException;
 
-	public void action(HttpServletRequest req, HttpServletResponse resp) throws IOException;
+	public void action(HttpServletRequest req, HttpServletResponse resp, Action action) throws IOException;
 
 }

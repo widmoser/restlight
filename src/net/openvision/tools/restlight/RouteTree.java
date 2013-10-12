@@ -42,17 +42,15 @@ public class RouteTree implements Routes {
 
 		@Override
 		public String getPathRepresentation() {
-			return method + " /";
+			return "/";
 		}
 
 	}
 
 	private Map<String, RouteNode> methods = new HashMap<String, RouteNode>();
 
-	private static String[] supportedMethods = { "POST", "PUT", "PATCH", "GET", "DELETE", "OPTIONS", "TRACE" };
-
 	public RouteTree() {
-		for (String method : supportedMethods) {
+		for (String method : SupportedMethods) {
 			methods.put(method, new MethodNode(method));
 		}
 	}
@@ -94,28 +92,33 @@ public class RouteTree implements Routes {
 		}
 	}
 
-	private void appendActions(String path, RouteNode node, List<String> actions) {
+	private void appendActions(String method, String path, RouteNode node, List<Route> actions) {
 		path = path + node.getPathRepresentation();
 		if (node.getControllerClassName() != null) {
-			actions.add(path);
+			actions.add(new Route(method, path, node.getControllerClassName()));
 		} else {
 			for (RouteNode n : node.getChildren()) {
-				appendActions(path, n, actions);
+				appendActions(method, path, n, actions);
 			}
 		}
 	}
 
 	@Override
-	public List<String> getActions() {
-		List<String> result = new ArrayList<String>();
-		for (RouteNode method : methods.values()) {
-			appendActions("", method, result);
+	public List<Route> getRoutes() {
+		List<Route> result = new ArrayList<Route>();
+		for (Map.Entry<String, RouteNode> e : methods.entrySet()) {
+			appendActions(e.getKey(), "", e.getValue(), result);
 		}
 		return result;
 	}
 
 	@Override
-	public Controller getController(String method, String uri) throws UnsupportedMethodException, MatchException {
-		return getRoot(method).findNode(uri).getController();
+	public Action getAction(String method, String uri) throws UnsupportedMethodException {
+		try {
+			Controller c = getRoot(method).findNode(uri).getController();
+			return new Action(method, uri, c, null);
+		} catch (MatchException e) {
+			return null;
+		}
 	}
 }

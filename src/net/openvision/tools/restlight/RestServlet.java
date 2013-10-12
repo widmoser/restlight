@@ -68,7 +68,7 @@ public class RestServlet extends HttpServlet {
 		initTemplateEngine(config);
 		String filename = config.getInitParameter("routes");
 		try {
-			RouteTreeParser parser = new RouteTreeParser();
+			Parser parser = new PatternParser();
 			routes = parser.parse(new FileReader(filename));
 			routes.initControllers();
 		} catch (ParseException e) {
@@ -90,18 +90,21 @@ public class RestServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
 			IOException {
 		try {
-			routes.getController(request.getMethod(), request.getRequestURI()).action(request, response);
-		} catch (MatchException e) {
-			try {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			Action action = routes.getAction(request.getMethod(), request.getRequestURI());
+			if (action != null) {
+				action.execute(request, response);
+			} else {
+				try {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-				Template template = new Template("ActionNotFound", new InputStreamReader(getClass()
-						.getResourceAsStream("actionNotFound.ftl")), cfg);
-				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("actions", routes.getActions());
-				template.process(data, response.getWriter());
-			} catch (TemplateException e1) {
-				e1.printStackTrace(response.getWriter());
+					Template template = new Template("ActionNotFound", new InputStreamReader(getClass()
+							.getResourceAsStream("actionNotFound.ftl")), cfg);
+					Map<String, Object> data = new HashMap<String, Object>();
+					data.put("actions", routes.getRoutes());
+					template.process(data, response.getWriter());
+				} catch (TemplateException e1) {
+					e1.printStackTrace(response.getWriter());
+				}
 			}
 		} catch (UnsupportedMethodException e) {
 			response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
