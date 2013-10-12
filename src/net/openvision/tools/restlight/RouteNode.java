@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.List;
 
+import javax.servlet.ServletException;
+
 public interface RouteNode {
 
 	public List<RouteNode> getChildren();
@@ -21,5 +23,12 @@ public interface RouteNode {
 	public void setControllerClassName(String clazz);
 
 	public String getControllerClassName();
+	
+	public Controller getController();
+
+	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+			ServletException;
+
+	RouteNode findNode(PushbackReader reader) throws MatchException;
 
 }

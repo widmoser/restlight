@@ -1,11 +1,16 @@
 package net.openvision.tools.restlight;
 
+import java.io.IOException;
+import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.ServletException;
 
 public abstract class AbstractRouteNode implements RouteNode {
 
 	protected String controllerClassName;
+	protected Controller controller;
 	protected List<RouteNode> children;
 
 	public AbstractRouteNode() {
@@ -45,6 +50,42 @@ public abstract class AbstractRouteNode implements RouteNode {
 	@Override
 	public String getControllerClassName() {
 		return controllerClassName;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+			ServletException {
+		if (controllerClassName != null) {
+			Class<? extends Controller> c = (Class<? extends Controller>) Class.forName(controllerClassName);
+			controller = c.newInstance();
+			controller.init();
+		}
+		for (RouteNode n : children) {
+			n.initControllers();
+		}
+	}
+
+	@Override
+	public Controller getController() {
+		return controller;
+	}
+
+	public RouteNode findNode(PushbackReader reader) throws MatchException {
+		try {
+			if (controller != null) {
+				return this;
+			} else {
+				for (RouteNode n : children) {
+					if (n.matches(reader)) {
+						return n.findNode(reader);
+					}
+				}
+				throw new MatchException("Action not found.");
+			}
+		} catch (IOException e) {
+			throw new MatchException("Unexpected error: " + e.getLocalizedMessage());
+		}
 	}
 
 }

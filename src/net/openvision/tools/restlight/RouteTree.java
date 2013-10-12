@@ -5,6 +5,8 @@ import java.io.PushbackReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
 /**
  * A tree that allows to decide who should handle the request.
  * 
@@ -23,7 +25,7 @@ public class RouteTree {
 
 		@Override
 		public boolean matches(PushbackReader reader) throws IOException, MatchException {
-			return false;
+			return true;
 		}
 
 		@Override
@@ -69,5 +71,12 @@ public class RouteTree {
 			print(output, 0, method);
 		}
 		return output.toString();
+	}
+
+	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+			ServletException {
+		for (RouteNode method : methods.values()) {
+			method.initControllers();
+		}
 	}
 }
