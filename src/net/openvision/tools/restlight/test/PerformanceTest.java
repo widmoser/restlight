@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import net.openvision.tools.restlight.MatchException;
 import net.openvision.tools.restlight.ParseException;
 import net.openvision.tools.restlight.Parser;
 import net.openvision.tools.restlight.PatternParser;
@@ -22,7 +21,7 @@ public class PerformanceTest {
 		return null;
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, IOException, ParseException, UnsupportedMethodException, MatchException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, ParseException, UnsupportedMethodException {
 		String filename = "routes";
 		// process(filename, new RouteTreeParser());
 		long time = System.nanoTime();
