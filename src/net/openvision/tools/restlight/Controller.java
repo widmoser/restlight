@@ -6,10 +6,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public interface Controller {
+public abstract class Controller {
 
-	public void init() throws ServletException;
+	private Routes routes;
+	
+	void setRoutes(Routes routes) {
+		this.routes = routes;
+	}
+	
+	public abstract void init() throws ServletException;
 
-	public void action(HttpServletRequest req, HttpServletResponse resp, Action action) throws IOException;
-
+	public abstract void action(HttpServletRequest req, HttpServletResponse resp, Action action) throws IOException;
+	
+	protected Routes getRoutes() {
+		return routes;
+	}
+	
 }

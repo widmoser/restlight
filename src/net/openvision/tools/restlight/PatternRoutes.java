@@ -9,9 +9,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
-
-public class PatternRoutes implements Routes {
+public class PatternRoutes extends Routes {
 
 	private List<Route> routesList;
 	private Map<String, List<Route>> routes;
@@ -148,14 +146,6 @@ public class PatternRoutes implements Routes {
 			action = new Action(method, uri, selectedRoute.route.getController(), params);
 		}
 		return action;
-	}
-
-	@Override
-	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-			ServletException {
-		for (Route r : routesList) {
-			r.initController();
-		}
 	}
 
 	@Override

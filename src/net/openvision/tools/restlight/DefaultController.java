@@ -6,7 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class DefaultController implements Controller {
+public class DefaultController extends Controller {
 
 	@Override
 	public void init() throws ServletException {

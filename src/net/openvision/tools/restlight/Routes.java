@@ -1,6 +1,8 @@
 package net.openvision.tools.restlight;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.servlet.ServletException;
 
@@ -12,15 +14,29 @@ import javax.servlet.ServletException;
  * @author Hannes Widmoser
  * 
  */
-public interface Routes {
+public abstract class Routes {
 
 	public static String[] SupportedMethods = { "POST", "PUT", "PATCH", "GET", "DELETE", "OPTIONS", "TRACE" };
 
-	public List<Route> getRoutes();
+	public abstract List<Route> getRoutes();
 
-	public Action getAction(String method, String uri) throws UnsupportedMethodException;
+	public abstract Action getAction(String method, String uri) throws UnsupportedMethodException;
 
+	public String getLink(Class<? extends Controller> controllerClass, Object... params) {
+		for (Route r : getRoutes()) {
+			if (r.getControllerClassName().equals(controllerClass.getName())) {
+				return r.getLink(params);
+			}
+		}
+		throw new NoSuchElementException();
+	}
+	
 	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-			ServletException;
+			ServletException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
+			SecurityException {
+		for (Route r : getRoutes()) {
+			r.initController(this);
+		}
+	}
 
 }

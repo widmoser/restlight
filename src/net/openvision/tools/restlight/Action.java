@@ -36,6 +36,10 @@ public class Action {
 	public String getParameter(String name) {
 		return parameters.get(name);
 	}
+	
+	public boolean hasParameter(String name) {
+		return parameters.containsKey(name);
+	}
 
 	public void execute(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		controller.action(req, resp, this);

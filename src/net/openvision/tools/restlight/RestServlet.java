@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,6 +83,14 @@ public class RestServlet extends HttpServlet {
 		} catch (InstantiationException e) {
 			throw new ServletException(e);
 		} catch (IllegalAccessException e) {
+			throw new ServletException(e);
+		} catch (IllegalArgumentException e) {
+			throw new ServletException(e);
+		} catch (InvocationTargetException e) {
+			throw new ServletException(e);
+		} catch (NoSuchMethodException e) {
+			throw new ServletException(e);
+		} catch (SecurityException e) {
 			throw new ServletException(e);
 		}
 	}
