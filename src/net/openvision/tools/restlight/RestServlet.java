@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.google.appengine.api.utils.SystemProperty;
-
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -33,6 +31,8 @@ public class RestServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -3619582143214803843L;
 
+	private boolean isRefreshingRoutesFile = false;
+	
 	private String routesMD5;
 	private String routesFilename;
 	private Routes routes;
@@ -103,6 +103,10 @@ public class RestServlet extends HttpServlet {
 			throw new ServletException(e);
 		}
 	}
+	
+	protected void setRefreshRoutesFile(boolean on) {
+		isRefreshingRoutesFile = on;
+	}
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -114,7 +118,7 @@ public class RestServlet extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Development && (routesMD5 == null || !routesMD5.equals(getRoutesMD5()))) {
+			if (isRefreshingRoutesFile && (routesMD5 == null || !routesMD5.equals(getRoutesMD5()))) {
 				loadRoutes();
 			}
 
