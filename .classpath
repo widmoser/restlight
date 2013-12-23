@@ -2,11 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.8.3/appengine-java-sdk-1.8.3/lib/shared/servlet-api.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.8.3/appengine-java-sdk-1.8.3/docs/javadoc/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/freemarker-gae-2.3.20.jar"/>
+	<classpathentry kind="lib" path="/Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.8.8/appengine-java-sdk-1.8.8/lib/shared/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.8.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

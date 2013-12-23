@@ -1,5 +1,6 @@
 package net.openvision.tools.restlight;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,6 +14,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
+import com.google.appengine.api.utils.SystemProperty;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -28,6 +33,8 @@ public class RestServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -3619582143214803843L;
 
+	private String routesMD5;
+	private String routesFilename;
 	private Routes routes;
 
 	private Configuration cfg;
@@ -64,16 +71,18 @@ public class RestServlet extends HttpServlet {
 																// 2.3.20
 	}
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		initTemplateEngine(config);
-		String filename = config.getInitParameter("routes");
+	private String getRoutesMD5() throws IOException, ServletException {
+		return DigestUtils.md5Hex(new FileInputStream(routesFilename));
+	}
+
+	private void loadRoutes() throws ServletException {
 		try {
 			Parser parser = new PatternParser();
-			routes = parser.parse(new FileReader(filename));
+			routes = parser.parse(new FileReader(routesFilename));
 			routes.initControllers();
+			routesMD5 = getRoutesMD5();
 		} catch (ParseException e) {
-			throw new ServletException(filename + ":" + e.getLine() + " - " + e.getLocalizedMessage(), e);
+			throw new ServletException(routesFilename + ":" + e.getLine() + " - " + e.getLocalizedMessage(), e);
 		} catch (FileNotFoundException e) {
 			throw new ServletException(e);
 		} catch (IOException e) {
@@ -96,9 +105,19 @@ public class RestServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	public void init(ServletConfig config) throws ServletException {
+		initTemplateEngine(config);
+		routesFilename = config.getInitParameter("routes");
+		loadRoutes();
+	}
+
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
+			if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Development && (routesMD5 == null || !routesMD5.equals(getRoutesMD5()))) {
+				loadRoutes();
+			}
+
 			Action action = routes.getAction(request.getMethod(), request.getRequestURI());
 			if (action != null) {
 				action.execute(request, response);
@@ -106,8 +125,7 @@ public class RestServlet extends HttpServlet {
 				try {
 					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-					Template template = new Template("ActionNotFound", new InputStreamReader(getClass()
-							.getResourceAsStream("actionNotFound.ftl")), cfg);
+					Template template = new Template("ActionNotFound", new InputStreamReader(getClass().getResourceAsStream("actionNotFound.ftl")), cfg);
 					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("actions", routes.getRoutes());
 					template.process(data, response.getWriter());
