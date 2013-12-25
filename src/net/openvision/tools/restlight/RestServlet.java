@@ -129,7 +129,7 @@ public class RestServlet extends HttpServlet {
 				try {
 					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-					Template template = new Template("ActionNotFound", new InputStreamReader(getClass().getResourceAsStream("actionNotFound.ftl")), cfg);
+					Template template = new Template("ActionNotFound", new InputStreamReader(RestServlet.class.getResourceAsStream("actionNotFound.ftl")), cfg);
 					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("actions", routes.getRoutes());
 					template.process(data, response.getWriter());
