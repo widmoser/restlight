@@ -65,17 +65,21 @@ public class PatternRoutes extends Routes {
 	}
 
 	private PathRegex processPathExpression(int index, Route route) {
-		String[] pathElements = route.getPathExpression().split("/");
 		StringBuilder s = new StringBuilder();
 		List<Parameter> parameters = new ArrayList<>();
-		for (String pathElement : pathElements) {
-			if (pathElement.length() > 0) {
-				s.append("/");
-				if (pathElement.startsWith(":")) {
-					s.append("(\\w+)");
-					parameters.add(new Parameter(pathElement.substring(1)));
-				} else {
-					s.append(pathElement);
+		if (route.getPathExpression().equals("/")) {
+			s.append("/");
+		} else {
+			String[] pathElements = route.getPathExpression().split("/");
+			for (String pathElement : pathElements) {
+				if (pathElement.length() > 0) {
+					s.append("/");
+					if (pathElement.startsWith(":")) {
+						s.append("(\\w+)");
+						parameters.add(new Parameter(pathElement.substring(1)));
+					} else {
+						s.append(pathElement);
+					}
 				}
 			}
 		}

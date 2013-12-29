@@ -1,1 +1,1 @@
-GET   /test   ws.holybook.api.TestResource
+GET   /   ws.holybook.api.TestResource
