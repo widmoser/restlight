@@ -9,9 +9,14 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class Controller {
 
 	private Routes routes;
+	private RestServlet servlet;
 	
 	void setRoutes(Routes routes) {
 		this.routes = routes;
+	}
+	
+	void setServlet(RestServlet servlet) {
+		this.servlet = servlet;
 	}
 	
 	public abstract void init() throws ServletException;
@@ -20,6 +25,10 @@ public abstract class Controller {
 	
 	protected Routes getRoutes() {
 		return routes;
+	}
+	
+	protected RestServlet getServlet() {
+		return servlet;
 	}
 	
 }

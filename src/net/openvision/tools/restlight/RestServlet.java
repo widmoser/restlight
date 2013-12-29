@@ -70,6 +70,10 @@ public class RestServlet extends HttpServlet {
 		cfg.setIncompatibleImprovements(new Version(2, 3, 20)); // FreeMarker
 																// 2.3.20
 	}
+	
+	public Configuration getTemplateConfiguration() {
+		return cfg;
+	}
 
 	private String getRoutesMD5() throws IOException, ServletException {
 		return DigestUtils.md5Hex(new FileInputStream(routesFilename));
@@ -79,7 +83,7 @@ public class RestServlet extends HttpServlet {
 		try {
 			Parser parser = new PatternParser();
 			routes = parser.parse(new FileReader(routesFilename));
-			routes.initControllers();
+			routes.initControllers(this);
 			routesMD5 = getRoutesMD5();
 		} catch (ParseException e) {
 			throw new ServletException(routesFilename + ":" + e.getLine() + " - " + e.getLocalizedMessage(), e);

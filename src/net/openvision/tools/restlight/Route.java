@@ -45,12 +45,13 @@ public class Route {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void initController(Routes routes) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
+	public void initController(Routes routes, RestServlet servlet) throws InstantiationException, IllegalAccessException, ClassNotFoundException,
 			ServletException {
 		if (controllerClassName != null) {
 			Class<? extends Controller> c = (Class<? extends Controller>) Class.forName(controllerClassName);
 			controller = c.newInstance();
 			controller.setRoutes(routes);
+			controller.setServlet(servlet);
 			controller.init();
 		}
 	}

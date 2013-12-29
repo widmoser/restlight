@@ -31,11 +31,11 @@ public abstract class Routes {
 		throw new NoSuchElementException();
 	}
 	
-	public void initControllers() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+	public void initControllers(RestServlet servlet) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			ServletException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
 			SecurityException {
 		for (Route r : getRoutes()) {
-			r.initController(this);
+			r.initController(this, servlet);
 		}
 	}
 
